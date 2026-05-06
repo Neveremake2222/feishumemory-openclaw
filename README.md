@@ -79,11 +79,6 @@ lark-cli auth status
 ## Useful Docs
 
 - `docs/whitepaper.md`
-- `docs/椤圭洰灞曠ず鑴氭湰.md`
-- `docs/鏍稿績浠ｇ爜灞曠ず娓呭崟.md`
-- `docs/椤圭洰浜偣涓庤瘎鍒嗙淮搴﹀鐓?md`
-- `docs/鏈€缁堟敼杩?md`
-- `docs/鏄庢棩鎻愪氦娓呭崟.md`
 
 ## Requirements
 
