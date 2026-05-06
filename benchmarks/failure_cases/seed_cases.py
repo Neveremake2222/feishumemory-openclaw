@@ -1,0 +1,98 @@
+"""Seed failure cases for the structured failure case database."""
+
+from __future__ import annotations
+
+from benchmarks.structures import FailureCase
+
+SEED_FAILURE_CASES: list[FailureCase] = [
+    FailureCase(
+        case_id="FC-001",
+        failure_type="retrieval",
+        original_query="技术选型方案是什么",
+        system_response="未找到相关记忆",
+        expected_behavior="应返回技术选型决策卡片（方案 B），因为相关决策记忆已写入",
+        evidence_gaps=[
+            "BM25 无法匹配同义词：'技术选型' vs '方案确定' vs '选型决策'",
+            "用户查询与记忆标题之间的词汇重叠不足，BM25 分数低于 min_score 阈值",
+        ],
+        memory_ids_involved=[],
+        memory_titles_involved=["技术选型确定为方案 B"],
+        corrected_query="方案选择 方案 B 技术决策",
+        corrected_response="技术选型确定为方案 B，原因是性能优于方案 A，参与人：张三、李四",
+        spec_ref="9.5 Retrieval failure",
+        discovered_date="2026-04-28",
+        notes="Phase 1 BM25 纯词法匹配的固有限制，Phase 2 引入语义向量后可缓解",
+    ),
+    FailureCase(
+        case_id="FC-002",
+        failure_type="retrieval",
+        original_query="负责人",
+        system_response="返回了 5 条记忆，其中 3 条与当前项目无关",
+        expected_behavior="只应返回当前项目的负责人信息，不返回其他项目的负责人记忆",
+        evidence_gaps=[
+            "查询过短，'负责人' 匹配了所有包含负责人字样的记忆",
+            "缺少项目上下文自动关联，用户未明确指定 project_id",
+        ],
+        memory_ids_involved=[],
+        memory_titles_involved=["项目 Alpha 负责人为张三", "项目 Beta 负责人为李四", "运维组负责人变更"],
+        corrected_query="项目 Alpha 的负责人是谁",
+        corrected_response="项目 Alpha 负责人为张三",
+        spec_ref="9.5 Retrieval failure",
+        discovered_date="2026-04-28",
+        notes="查询过短导致召回噪声过大，需要 query rewrite 或意图消歧",
+    ),
+    FailureCase(
+        case_id="FC-003",
+        failure_type="maintenance",
+        original_query="项目截止时间是什么时候",
+        system_response="返回截止时间 4 月 15 日",
+        expected_behavior="应返回最新截止时间 4 月 22 日，旧版本 4 月 15 日已被 superseded",
+        evidence_gaps=[
+            "update() 操作未正确执行，旧记忆 status 仍为 active",
+            "或 recall 查询未过滤 superseded 记忆",
+        ],
+        memory_ids_involved=[],
+        memory_titles_involved=["项目截止时间更新为 4 月 15 日", "项目截止时间更新为 4 月 22 日"],
+        corrected_query="项目截止时间是什么时候",
+        corrected_response="项目截止时间为 4 月 22 日，因需求变更从 4 月 15 日延期",
+        spec_ref="9.5 Memory maintenance failure",
+        discovered_date="2026-04-28",
+        notes="版本链回溯测试，验证 superseded 逻辑正确性",
+    ),
+    FailureCase(
+        case_id="FC-004",
+        failure_type="reasoning",
+        original_query="为什么要选择方案 B",
+        system_response="返回了方案 B 的决策卡片，但没有附带变更原因",
+        expected_behavior="应返回决策卡片并附带变更原因（性能优于 A），因为变更原因存储在 change_reason 字段",
+        evidence_gaps=[
+            "recall 返回结果未包含 change_reason 字段",
+            "智能体未能从返回的记忆结构中提取决策理由",
+        ],
+        memory_ids_involved=[],
+        memory_titles_involved=["技术选型确定为方案 B"],
+        corrected_query="为什么要选择方案 B",
+        corrected_response="方案 B 被选中的原因是性能优于方案 A，参与人：张三、李四，决策来源：技术评审会议",
+        spec_ref="9.5 Reasoning failure",
+        discovered_date="2026-04-28",
+        notes="测试 recall 结果结构的完整性，验证 evidence 和 change_reason 字段是否可被智能体利用",
+    ),
+    FailureCase(
+        case_id="FC-005",
+        failure_type="interaction",
+        original_query="帮我继续推进项目",
+        system_response="智能体开始规划项目，但没有检查历史决策和当前状态",
+        expected_behavior="智能体应先召回项目当前状态、历史决策和待办事项，然后基于记忆上下文规划下一步",
+        evidence_gaps=[
+            "智能体未主动触发记忆检索",
+            "缺少 '任务继续' 意图到记忆召回的触发映射",
+        ],
+        memory_ids_involved=[],
+        memory_titles_involved=["项目 Alpha 技术选型决策", "项目 Alpha 当前阶段：开发中", "项目 Alpha 待办：接口联调"],
+        corrected_query="帮我继续推进项目 Alpha",
+        corrected_response="项目 Alpha 当前处于开发阶段。上次决策：技术选型为方案 B。当前待办：接口联调。建议下一步：...",
+        spec_ref="9.5 Interaction failure",
+        discovered_date="2026-04-28",
+        notes="测试智能体是否在任务继续场景中主动召回记忆",
+    ),
+]

@@ -1,0 +1,14 @@
+{
+  "id": "openclaw-extension-memory-engine",
+  "skills": ["./skills"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "apiUrl": {
+        "type": "string",
+        "description": "Base URL for the memory-engine API (default: http://localhost:8000)"
+      }
+    }
+  }
+}

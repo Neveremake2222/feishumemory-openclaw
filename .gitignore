@@ -1,0 +1,65 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+.env.local
+*.env
+secrets.json
+credentials.json
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# Database files
+*.sqlite3
+*.sqlite
+*.db
+
+# Test runtime artifacts
+tests_runtime/
+benchmarks_runtime/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+tmp_codex_review/
+tmp_codex_review2/
+
+# Demo artifacts
+demo_memory.sqlite3
+memory_engine.sqlite3
+BENCHMARK_REPORT.md
+
+# Logs
+*.log
+logs/
+
+# Editor and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local agent/tooling state
+.claude/
+
+# Local-only docs (not pushed to GitHub by default)
+docs/*
+!docs/
+!docs/whitepaper.md
+!docs/benchmark-report.md
+!docs/项目展示脚本.md
+!docs/核心代码展示清单.md
+!docs/项目亮点与评分维度对照.md
+!docs/最终改进.md
+!docs/明日提交清单.md
+spec.md
+任务要求.md
+demo_memory_engine.py
+config/TOOLS.md
+config/openclaw_tools.md
+cloud_payload.b64
+tests/fixtures/feishu_study_log.jsonl

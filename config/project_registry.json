@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "project_id": "feishu_openclaw_memory",
+      "name": "Feishu Memory Demo Project",
+      "aliases": [
+        "feishumemory",
+        "feishu memory",
+        "openclaw memory"
+      ],
+      "chat_ids": [
+        "oc_example_chat_id"
+      ],
+      "doc_ids": [],
+      "wiki_ids": [],
+      "repo_paths": [],
+      "openclaw_workspace_ids": [],
+      "default_scope": "project",
+      "status": "active"
+    }
+  ]
+}

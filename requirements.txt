@@ -1,0 +1,6 @@
+fastapi
+httpx
+lark-oapi
+pydantic
+pytest
+uvicorn
