@@ -1,4 +1,4 @@
-﻿"""Tests for feishu_ingest.project_registry and scope integration."""
+"""Tests for feishu_ingest.project_registry and scope integration."""
 
 from __future__ import annotations
 
@@ -270,7 +270,7 @@ class TestAutoRegister(unittest.TestCase):
         pid = registry.register_chat("oc_new_chat")
         self.assertEqual(pid, "auto_oc_new_chat")
         self.assertEqual(registry.project_for_chat("oc_new_chat"), "auto_oc_new_chat")
-        self.assertEqual(registry.get_project("auto_oc_new_chat").name, "椋炰功缇よ亰 oc_new_chat")
+        self.assertEqual(registry.get_project("auto_oc_new_chat").name, "\u672a\u547d\u540d\u9879\u76ee1")
 
     def test_register_chat_idempotent(self):
         p = self._write_json({
@@ -310,7 +310,7 @@ class TestAutoRegister(unittest.TestCase):
         registry2 = ProjectRegistry.load(p)
         self.assertEqual(registry2.project_for_chat("oc_roundtrip"), "auto_oc_roundtrip")
         proj = registry2.get_project("auto_oc_roundtrip")
-        self.assertEqual(proj.name, "椋炰功缇よ亰 oc_roundtrip")
+        self.assertEqual(proj.name, "\u672a\u547d\u540d\u9879\u76ee1")
 
     def test_auto_register_in_daemon_flow(self):
         """Simulate: daemon receives unregistered chat, auto-registers, then event

@@ -10,6 +10,10 @@ from .models import RecallRequest
 from .summary_agent import SummarySubAgent
 
 
+UNNAMED_PROJECT_PREFIX = "\u672a\u547d\u540d\u9879\u76ee"
+MOJIBAKE_MARKERS = ("\u00c3", "\u00c2", "\u00e6", "\u00e7", "\u00e9", "\u00e5", "\u00e8", "\u00e3", "\u00f0", "\ufffd")
+
+
 RISK_TERMS = ("风险", "阻塞", "卡点", "缺", "影响", "延期", "失败", "不稳定", "问题")
 ACTION_TERMS = ("下一步", "待办", "需要", "补齐", "确认", "跟进", "修复", "安排")
 
@@ -419,8 +423,63 @@ def _project_name(engine: MemoryEngine, project_id: str) -> str:
     for row in rows:
         payload = _loads(row["payload_json"], {})
         title = payload.get("chat_title") or payload.get("project_name")
-        if title:
-            return str(title)
+        if _is_usable_project_name(title, project_id):
+            return str(title).strip()
+
+    registry_name = _registry_project_name(project_id)
+    if _is_usable_project_name(registry_name, project_id):
+        return str(registry_name).strip()
+
+    return _unnamed_project_name(engine, project_id)
+
+
+def _registry_project_name(project_id: str) -> str | None:
+    try:
+        from feishu_ingest.project_registry import ProjectRegistry
+
+        registry = ProjectRegistry.get_instance()
+        if registry is None:
+            registry = ProjectRegistry.load("config/project_registry.json")
+        project = registry.get_project(project_id) if registry else None
+        return project.name if project else None
+    except Exception:
+        return None
+
+
+def _is_usable_project_name(value: Any, project_id: str) -> bool:
+    if not value:
+        return False
+    name = str(value).strip()
+    if not name or name == project_id or name.startswith("auto_") or name.startswith("oc_"):
+        return False
+    if project_id.startswith("auto_") and "oc_" in name:
+        return False
+    return not (project_id.startswith("auto_") and _looks_mojibake(name))
+
+
+def _looks_mojibake(value: str) -> bool:
+    marker_count = sum(value.count(marker) for marker in MOJIBAKE_MARKERS)
+    latin1_count = sum(1 for char in value if 0x00C0 <= ord(char) <= 0x00FF)
+    return marker_count >= 2 or latin1_count >= 3
+
+
+def _unnamed_project_name(engine: MemoryEngine, project_id: str) -> str:
+    rows = engine.conn.execute(
+        """
+        SELECT project_id, MAX(updated_at) AS last_updated_at
+        FROM memories
+        WHERE status = 'active' AND project_id IS NOT NULL
+        GROUP BY project_id
+        ORDER BY last_updated_at DESC, project_id ASC
+        """
+    ).fetchall()
+    unnamed_ids: list[str] = []
+    for row in rows:
+        pid = row["project_id"]
+        if str(pid).startswith("auto_"):
+            unnamed_ids.append(pid)
+    if project_id in unnamed_ids:
+        return f"{UNNAMED_PROJECT_PREFIX}{unnamed_ids.index(project_id) + 1}"
     return project_id
 
 

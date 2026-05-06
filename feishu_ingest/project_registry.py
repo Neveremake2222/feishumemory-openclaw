@@ -1,4 +1,4 @@
-﻿"""Project Registry 鈥?machine-readable project identity source.
+"""Project Registry 鈥?machine-readable project identity source.
 
 Loads config/project_registry.json and provides lookup interfaces for:
     - chat_id   -> project_id   (feishu group chats)
@@ -23,6 +23,9 @@ import json
 import os
 from pathlib import Path
 from dataclasses import dataclass
+
+
+UNNAMED_PROJECT_PREFIX = "\u672a\u547d\u540d\u9879\u76ee"
 
 
 @dataclass(frozen=True)
@@ -148,12 +151,27 @@ class ProjectRegistry:
             # Create new project
             self._projects[pid] = ProjectRegistryProject(
                 project_id=pid,
-                name=name or f"椋炰功缇よ亰 {chat_id[:12]}",
+                name=name or self._next_unnamed_project_name(),
                 chat_ids=(chat_id,),
             )
 
         self._chat_to_project[chat_id] = pid
         return pid
+
+    def _next_unnamed_project_name(self) -> str:
+        used: set[int] = set()
+        for project in self._projects.values():
+            current = project.name.strip()
+            if not current.startswith(UNNAMED_PROJECT_PREFIX):
+                continue
+            suffix = current[len(UNNAMED_PROJECT_PREFIX):].strip()
+            if suffix.isdigit():
+                used.add(int(suffix))
+
+        idx = 1
+        while idx in used:
+            idx += 1
+        return f"{UNNAMED_PROJECT_PREFIX}{idx}"
 
     def save(self, path: str | Path | None = None) -> None:
         """Persist current in-memory registry state to JSON file.
