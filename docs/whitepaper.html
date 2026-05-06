@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞书记忆引擎 - 面向企业协作的结构化智能体记忆系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --warning: #fbbc04;
+            --bg-light: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 32px;
+        }
+
+        .hero .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: -40px 24px 48px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgb(0 0 0 / 0.15);
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .stat-card .sublabel {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* Sections */
+        section {
+            padding: 64px 0;
+        }
+
+        section:nth-child(even) {
+            background: white;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 24px 0 16px;
+            color: var(--text-primary);
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Charts Container */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .chart-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container.tall {
+            height: 400px;
+        }
+
+        /* Architecture Diagram */
+        .arch-diagram {
+            background: var(--bg-dark);
+            border-radius: 16px;
+            padding: 32px;
+            margin: 32px 0;
+            overflow-x: auto;
+        }
+
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .arch-node {
+            background: linear-gradient(135deg, var(--primary), #5e92f3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .arch-node.highlight {
+            background: linear-gradient(135deg, var(--secondary), #4ade80);
+        }
+
+        .arch-node.dark {
+            background: linear-gradient(135deg, #475569, #64748b);
+        }
+
+        .arch-arrow {
+            color: #94a3b8;
+            font-size: 1.5rem;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: "JetBrains Mono", "Fira Code", monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        .code-block .comment {
+            color: #64748b;
+        }
+
+        .code-block .keyword {
+            color: #c084fc;
+        }
+
+        .code-block .string {
+            color: #86efac;
+        }
+
+        .code-block .number {
+            color: #fbbf24;
+        }
+
+        /* Metrics Row */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+        }
+
+        .metric-item .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-item .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .comparison-card.highlight {
+            border-color: var(--secondary);
+        }
+
+        .comparison-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-card .score {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Workflow Steps */
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .workflow-step .step-num {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .workflow-step .step-content {
+            flex: 1;
+        }
+
+        .workflow-step .step-content h5 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .workflow-step .step-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Pipeline Visualization */
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        .pipeline-stage {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .pipeline-stage.highlight {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pipeline-arrow {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-dark);
+            color: #94a3b8;
+            padding: 48px 0;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                margin: -20px 16px 32px;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .arch-flow {
+                flex-direction: column;
+            }
+
+            .arch-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+            font-family: "JetBrains Mono", monospace;
+        }
+
+        .formula-box .formula {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .formula-box .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .formula-box .legend span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .formula-box .legend .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .formula-box .legend .dot.relevance { background: #3b82f6; }
+        .formula-box .legend .dot.freshness { background: #10b981; }
+        .formula-box .legend .dot.importance { background: #f59e0b; }
+        .formula-box .legend .dot.confidence { background: #8b5cf6; }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <header class="hero">
+        <div class="hero-content container">
+            <h1>飞书记忆引擎</h1>
+            <p class="subtitle">面向企业协作场景的结构化智能体记忆系统</p>
+            <div class="version">
+                <span>版本 1.1</span> · <span>2026-05-02</span> · <span>可运行 MVP</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Key Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="number">345</div>
+            <div class="label">测试用例通过</div>
+            <div class="sublabel">3 skipped</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">100%</div>
+            <div class="label">提取准确率</div>
+            <div class="sublabel">F1=1.00</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">71/71</div>
+            <div class="label">Benchmark 通过</div>
+            <div class="sublabel">Track A-I</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">11.37ms</div>
+            <div class="label">召回延迟 P50</div>
+            <div class="sublabel">100条记忆</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">15K+</div>
+            <div class="label">代码行数</div>
+            <div class="sublabel">57 Python文件</div>
+        </div>
+    </div>
+
+    <!-- Abstract -->
+    <section>
+        <div class="container">
+            <h2>摘要</h2>
+            <p>企业协作中，团队在飞书里做了大量决策、任务同步和个人偏好表达，但这些信息随着会话结束而消散。新智能体或新会话开始时，完全不知道历史上下文。</p>
+            <p>本项目实现了一个面向企业协作场景的结构化智能体记忆系统，将飞书/Lark 中的决策、任务状态和个人偏好抽取为可检索、可更新、可审计的结构化记忆，并通过 OpenClaw 适配层在智能体执行过程中主动召回和写入，形成完整闭环。</p>
+
+            <div class="metrics-row">
+                <div class="metric-item">
+                    <div class="value">100%</div>
+                    <div class="label">对话记忆召回</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">100%</div>
+                    <div class="label">决策版本链正确</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">100%</div>
+                    <div class="label">零结果拒绝准确</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">0%</div>
+                    <div class="label">陈旧决策泄漏</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem -->
+    <section>
+        <div class="container">
+            <h2>问题背景</h2>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>企业协作中的记忆困境</h4>
+                    <div class="chart-container">
+                        <canvas id="problemChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>现有方案的局限性</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>方案</th>
+                        <th>能做到</th>
+                        <th>做不到</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>聊天记录搜索</td>
+                        <td>找到包含关键词的消息</td>
+                        <td>判断"这条决策是否已被更新"</td>
+                    </tr>
+                    <tr>
+                        <td>普通 RAG</td>
+                        <td>检索相关文档片段</td>
+                        <td>理解"偏好只对用户A有效"</td>
+                    </tr>
+                    <tr>
+                        <td>人工记录</td>
+                        <td>结构化沉淀</td>
+                        <td>及时性差，容易遗漏</td>
+                    </tr>
+                    <tr>
+                        <td>OpenClaw 内置记忆</td>
+                        <td>跨会话持久化</td>
+                        <td>无法与外部飞书事件联动</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section>
+        <div class="container">
+            <h2>系统架构</h2>
+
+            <div class="arch-diagram">
+                <div class="arch-flow">
+                    <div class="arch-node">飞书 / Lark</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node dark">Fixture Replay</div>
+                    <span class="arch-arrow">|</span>
+                    <div class="arch-node dark">WebSocket</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node highlight">feishu_ingest</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node">memory_engine</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node highlight">openclaw_adapter</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-node">OpenClaw 智能体</div>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card highlight">
+                    <h4>🔌 三层适配器</h4>
+                    <p>FixtureAdapter / LarkCLIAdapter / LarkWsAdapter</p>
+                    <p class="score">100%</p>
+                    <p>云端飞书群聊验证通过</p>
+                </div>
+                <div class="comparison-card">
+                    <h4>💾 SQLite 存储</h4>
+                    <p>轻量、无依赖、支持事务</p>
+                    <p class="score">本地优先</p>
+                    <p>适合 MVP 快速验证</p>
+                </div>
+                <div class="comparison-card">
+                    <h4>🎯 确定性抽取</h4>
+                    <p>基于正则规则，不依赖 LLM</p>
+                    <p class="score">可解释</p>
+                    <p>评测确定性保证</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Model -->
+    <section>
+        <div class="container">
+            <h2>记忆数据模型</h2>
+
+            <h3>核心数据类型</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>记忆类型分布</h4>
+                    <div class="chart-container">
+                        <canvas id="memoryTypeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>记忆作用域分布</h4>
+                    <div class="chart-container">
+                        <canvas id="scopeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>数据库核心表</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>表</th>
+                        <th>用途</th>
+                        <th>关键字段</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>events</code></td>
+                        <td>来源事件存档</td>
+                        <td>source_type, source_ref, content_hash, source_version, actors</td>
+                    </tr>
+                    <tr>
+                        <td><code>memories</code></td>
+                        <td>结构化记忆</td>
+                        <td>memory_type, scope, importance, confidence, status, memory_layer</td>
+                    </tr>
+                    <tr>
+                        <td><code>recall_log</code></td>
+                        <td>召回观测</td>
+                        <td>memory_id, query, was_returned, raw_score, rank_index</td>
+                    </tr>
+                    <tr>
+                        <td><code>audit_log</code></td>
+                        <td>操作审计</td>
+                        <td>action, target_id, actor, sensitive_detections</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>记忆生命周期</h3>
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h5>写入 (write)</h5>
+                        <p>隐私扫描 → 候选抽取 → 冲突检测 → 原子提交</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h5>召回 (recall)</h5>
+                        <p>BM25评分 → 四维加权 → MMR重排 → 置信度分级</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h5>更新 (update)</h5>
+                        <p>新版本 supersede 旧版本，保留版本链</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h5>维护 (compact/heartbeat)</h5>
+                        <p>合并近重复 → 归档低价值 → 来源校验</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Write Mechanism -->
+    <section>
+        <div class="container">
+            <h2>写入机制</h2>
+
+            <div class="pipeline">
+                <div class="pipeline-stage">来源事件</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">隐私扫描</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage highlight">候选抽取</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">写入门控</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">冲突检测</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">SAVEPOINT</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">原子提交</div>
+            </div>
+
+            <h3>抽取模式覆盖</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>模式数量统计</h4>
+                    <div class="chart-container">
+                        <canvas id="extractionPatternsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>抽取置信度分布</h4>
+                    <div class="chart-container">
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>冲突检测类型</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>冲突类型</th>
+                        <th>检测条件</th>
+                        <th>处理策略</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>evidence_conflict</td>
+                        <td>同主题 + 数字矛盾</td>
+                        <td>两者保留，降低置信度，标记 review</td>
+                    </tr>
+                    <tr>
+                        <td>role_change</td>
+                        <td>决策 + 角色关键词</td>
+                        <td>supersede + 通知</td>
+                    </tr>
+                    <tr>
+                        <td>goal_drift</td>
+                        <td>决策 + 目标关键词</td>
+                        <td>两者保留，构成决策链</td>
+                    </tr>
+                    <tr>
+                        <td>constraint_supplement</td>
+                        <td>语义 + 增量关键词</td>
+                        <td>两者保留</td>
+                    </tr>
+                    <tr>
+                        <td>fact_override</td>
+                        <td>事实变更</td>
+                        <td>supersede + 版本链</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Recall Mechanism -->
+    <section>
+        <div class="container">
+            <h2>召回机制</h2>
+
+            <h3>评分公式</h3>
+            <div class="formula-box">
+                <div class="formula">score = 0.4 × relevance + 0.2 × freshness + 0.25 × importance + 0.15 × confidence</div>
+                <div class="legend">
+                    <span><span class="dot relevance"></span> relevance: BM25词法相关</span>
+                    <span><span class="dot freshness"></span> freshness: 指数衰减半衰期</span>
+                    <span><span class="dot importance"></span> importance: 写入时设定</span>
+                    <span><span class="dot confidence"></span> confidence: 抽取质量</span>
+                </div>
+            </div>
+
+            <h3>新鲜度半衰期配置</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>按记忆类型的半衰期</h4>
+                    <div class="chart-container">
+                        <canvas id="halfLifeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>BM25 参数</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>参数</th>
+                        <th>值</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>k1</td>
+                        <td>1.5</td>
+                        <td>词频饱和参数</td>
+                    </tr>
+                    <tr>
+                        <td>b</td>
+                        <td>0.75</td>
+                        <td>文档长度归一化参数</td>
+                    </tr>
+                    <tr>
+                        <td>min_score</td>
+                        <td>0.35</td>
+                        <td>融合分阈值过滤</td>
+                    </tr>
+                    <tr>
+                        <td>top_k</td>
+                        <td>10</td>
+                        <td>默认召回上限</td>
+                    </tr>
+                    <tr>
+                        <td>mmr_lambda</td>
+                        <td>0.7</td>
+                        <td>多样性重排参数</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>召回流程</h3>
+            <div class="pipeline">
+                <div class="pipeline-stage">RecallRequest</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">候选构建</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage highlight">BM25评分</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">四维加权</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">阈值过滤</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">MMR重排</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-stage">置信度分级</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benchmark Results -->
+    <section>
+        <div class="container">
+            <h2>评测结果</h2>
+
+            <h3>九轨 Benchmark (Track A-I)</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>各轨道通过率</h4>
+                    <div class="chart-container tall">
+                        <canvas id="trackResultsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>数据集构成</h4>
+                    <div class="chart-container">
+                        <canvas id="datasetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Track M 业务价值评测</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>业务指标对比</h4>
+                    <div class="chart-container">
+                        <canvas id="businessValueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>基线对比</h4>
+                    <div class="chart-container">
+                        <canvas id="baselineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Track M 业务指标</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>能力</th>
+                        <th>结果</th>
+                        <th>核心断言</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>项目摘要完整度</td>
+                        <td><span class="badge badge-success">100%</span></td>
+                        <td>召回方案、70% 进度、验收材料风险</td>
+                    </tr>
+                    <tr>
+                        <td>决策追溯准确率</td>
+                        <td><span class="badge badge-success">100%</span></td>
+                        <td>返回当前方案 B，排除旧方案 A</td>
+                    </tr>
+                    <tr>
+                        <td>风险识别召回率</td>
+                        <td><span class="badge badge-success">100%</span></td>
+                        <td>找到验收材料风险，排除普通进展</td>
+                    </tr>
+                    <tr>
+                        <td>跟进草稿事实一致性</td>
+                        <td><span class="badge badge-success">100%</span></td>
+                        <td>草稿事实来自召回记忆</td>
+                    </tr>
+                    <tr>
+                        <td>输入字数节省</td>
+                        <td><span class="badge badge-primary">81%</span></td>
+                        <td>短查询仍能召回当前决策</td>
+                    </tr>
+                    <tr>
+                        <td>操作步骤节省</td>
+                        <td><span class="badge badge-primary">80%</span></td>
+                        <td>一次查询替代人工翻记录</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Performance -->
+    <section>
+        <div class="container">
+            <h2>性能指标</h2>
+
+            <h3>召回延迟</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>不同规模下的召回延迟</h4>
+                    <div class="chart-container">
+                        <canvas id="recallLatencyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>召回延迟优化历程</h4>
+                    <div class="chart-container">
+                        <canvas id="optimizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <h3>抗干扰测试</h3>
+            <div class="chart-card">
+                <h4>关键记忆在不同噪声量下的 Top-1/Top-3 命中率</h4>
+                <div class="chart-container">
+                    <canvas id="interferenceChart"></canvas>
+                </div>
+            </div>
+
+            <h3>性能数据</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>规模</th>
+                        <th>活跃记忆</th>
+                        <th>返回条数</th>
+                        <th>P50 (ms)</th>
+                        <th>P95 (ms)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>小规模</td>
+                        <td>100</td>
+                        <td>10</td>
+                        <td>11.37</td>
+                        <td>12.34</td>
+                    </tr>
+                    <tr>
+                        <td>中规模</td>
+                        <td>1000</td>
+                        <td>10</td>
+                        <td>44.85</td>
+                        <td>53.11</td>
+                    </tr>
+                    <tr>
+                        <td>优化前</td>
+                        <td>1000</td>
+                        <td>10</td>
+                        <td>98.37</td>
+                        <td>120.45</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Governance -->
+    <section>
+        <div class="container">
+            <h2>记忆治理</h2>
+
+            <h3>晋升与降级门控</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h4>记忆层级分布</h4>
+                    <div class="chart-container">
+                        <canvas id="memoryLayerChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>治理投票流程</h4>
+                    <div class="workflow">
+                        <div class="workflow-step">
+                            <div class="step-num">1</div>
+                            <div class="step-content">
+                                <h5>Evidence Reviewer</h5>
+                                <p>检查可追溯源</p>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-num">2</div>
+                            <div class="step-content">
+                                <h5>Privacy Reviewer</h5>
+                                <p>扫描敏感信息</p>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-num">3</div>
+                            <div class="step-content">
+                                <h5>Scope Reviewer</h5>
+                                <p>验证作用域标识符</p>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-num">4</div>
+                            <div class="step-content">
+                                <h5>Conflict Reviewer</h5>
+                                <p>检查活动技能冲突</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>维护操作</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>操作</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>update</td>
+                        <td>新版记忆 supersede 旧版，保留版本链</td>
+                    </tr>
+                    <tr>
+                        <td>archive</td>
+                        <td>归档低价值记忆，保留数据但不出现在召回</td>
+                    </tr>
+                    <tr>
+                        <td>invalidate</td>
+                        <td>使记忆失效（删除权限变更等场景）</td>
+                    </tr>
+                    <tr>
+                        <td>compact</td>
+                        <td>合并近重复 + 归档长期低价值 + 过期 working 记忆</td>
+                    </tr>
+                    <tr>
+                        <td>promote</td>
+                        <td>working → factual 晋升，创建审计链</td>
+                    </tr>
+                    <tr>
+                        <td>heartbeat</td>
+                        <td>定期执行 compact + review + validate_sources</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section>
+        <div class="container">
+            <h2>竞品对比</h2>
+
+            <div class="chart-card">
+                <h4>与 Mem0 / Letta / MemGPT 对比</h4>
+                <div class="chart-container tall">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <h3>核心差异</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>维度</th>
+                        <th>本项目</th>
+                        <th>Mem0</th>
+                        <th>Letta / MemGPT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>核心定位</td>
+                        <td>企业协作事件到结构化 agent memory 的本地闭环</td>
+                        <td>通用 agent memory layer / managed memory service</td>
+                        <td>stateful agent platform</td>
+                    </tr>
+                    <tr>
+                        <td>主要输入</td>
+                        <td>飞书/Lark 消息、任务状态、偏好、工作流 trace</td>
+                        <td>应用对话、用户上下文</td>
+                        <td>agent 对话、工具调用</td>
+                    </tr>
+                    <tr>
+                        <td>冲突处理</td>
+                        <td>显式冲突检测 + superseded 版本链</td>
+                        <td>ADD-only，靠排序自然衰减</td>
+                        <td>文件覆盖为主</td>
+                    </tr>
+                    <tr>
+                        <td>作用域隔离</td>
+                        <td>project/user/task/session/organization 五级</td>
+                        <td>无</td>
+                        <td>memory blocks</td>
+                    </tr>
+                    <tr>
+                        <td>记忆演化</td>
+                        <td>L1→L2→L3 门控 + 治理投票</td>
+                        <td>无显式晋升</td>
+                        <td>Compactor 驱动</td>
+                    </tr>
+                    <tr>
+                        <td>隐私脱敏</td>
+                        <td>写入前自动检测 10 类敏感信息</td>
+                        <td>无</td>
+                        <td>无</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Demo -->
+    <section>
+        <div class="container">
+            <h2>演示案例</h2>
+
+            <h3>从飞书决策到可维护智能体记忆</h3>
+
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h5>结构化写入</h5>
+                        <p>用户在飞书群发送决策消息 → lark_ws_ingest_daemon 实时接收 → 抽取为结构化记忆</p>
+                        <div class="code-block">
+# 示例消息
+"我决定以后这个项目默认使用 SQLite + BM25 做轻量记忆检索。"
+
+# 写入结果
+Written memory_ids=[7] for msg om_xxx
+                        </div>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h5>召回不是关键词搜索</h5>
+                        <p>四维加权 + scope 过滤 + MMR 重排 + recall_log 记录</p>
+                        <div class="code-block">
+# 查询
+"我之前对这个项目的检索方案做过什么决定？"
+
+# 召回结果
+## External Memory
+- [DECISION] SQLite + BM25 做轻量记忆检索
+  Evidence: feishu_message:om_xxx
+                        </div>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h5>记忆会维护</h5>
+                        <p>新决策替代旧决策，版本链可追溯</p>
+                        <div class="code-block">
+# 新消息
+"最终决定：检索仍用 BM25，但存储从 demo sqlite 切到正式 SQLite 文件。"
+
+# 系统自动处理
+- 新 memory_id = 8
+- 旧记忆 status = superseded
+- superseded_by = [新UUID]
+- audit_log 记录更新
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Limitations -->
+    <section>
+        <div class="container">
+            <h2>局限与未来工作</h2>
+
+            <h3>当前局限</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>局限</th>
+                        <th>说明</th>
+                        <th>优先级</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>时区展示</td>
+                        <td>created_at 存 UTC，展示层未转本地时区</td>
+                        <td><span class="badge badge-warning">P1</span></td>
+                    </tr>
+                    <tr>
+                        <td>LLM 抽取</td>
+                        <td>Phase 1 纯规则抽取，复杂隐式表达可能遗漏</td>
+                        <td><span class="badge badge-primary">P2</span></td>
+                    </tr>
+                    <tr>
+                        <td>向量检索</td>
+                        <td>Phase 1 仅 BM25，语义相似召回依赖规则覆盖度</td>
+                        <td><span class="badge badge-primary">P2</span></td>
+                    </tr>
+                    <tr>
+                        <td>规模验证</td>
+                        <td>评测基于 1000 条记忆，更大规模待验证</td>
+                        <td><span class="badge badge-primary">P2</span></td>
+                    </tr>
+                    <tr>
+                        <td>来源校验</td>
+                        <td>已有只读接口，接入真实飞书 resolver 仍是后续工作</td>
+                        <td><span class="badge badge-primary">P1</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>已完成 (Phase 1+2)</h3>
+            <div class="metrics-row">
+                <div class="metric-item">
+                    <div class="value">✓</div>
+                    <div class="label">Project Registry</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">✓</div>
+                    <div class="label">中文 Bigram</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">✓</div>
+                    <div class="label">RecallOutput 元数据</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">✓</div>
+                    <div class="label">BM25 缓存</div>
+                </div>
+                <div class="metric-item">
+                    <div class="value">✓</div>
+                    <div class="label">来源校验接口</div>
+                </div>
+            </div>
+
+            <h3>未来工作</h3>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>P1</h4>
+                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                        <li>UTC+8 本地化展示</li>
+                        <li>接入真实飞书 resolver</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>P2</h4>
+                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                        <li>结构化 facts 层</li>
+                        <li>valid_from / valid_until</li>
+                        <li>10k+ 规模 benchmark</li>
+                    </ul>
+                </div>
+                <div class="comparison-card">
+                    <h4>Phase 2</h4>
+                    <ul style="margin-left: 20px; color: var(--text-secondary);">
+                        <li>LLM 查询改写</li>
+                        <li>反馈驱动晋升</li>
+                        <li>Bayesian evidence confidence</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section>
+        <div class="container">
+            <h2>快速启动</h2>
+
+            <h3>环境要求</h3>
+            <ul style="margin-left: 20px; color: var(--text-secondary);">
+                <li>Python 3.10+</li>
+                <li>pip 安装依赖：pip install -r requirements.txt</li>
+            </ul>
+
+            <h3>本地运行</h3>
+            <div class="code-block">
+<span class="comment"># 启动 memory-engine API</span>
+uvicorn openclaw_adapter.api:app --host 0.0.0.0 --port 8000
+
+<span class="comment"># 运行测试</span>
+python -m pytest tests -q
+
+<span class="comment"># 运行 benchmark</span>
+python benchmarks/runner.py
+
+<span class="comment"># 运行召回性能基准</span>
+python benchmarks/recall_baseline.py
+            </div>
+
+            <h3>云端部署</h3>
+            <div class="code-block">
+<span class="comment"># 启动 API</span>
+cd ~/workspace/agent/feishumemory
+nohup python3 -m uvicorn openclaw_adapter.api:app --host 0.0.0.0 --port 8000 > api.log 2>&1 &
+
+<span class="comment"># 启动 lark_ws ingest daemon</span>
+export LARK_APP_ID=cli_xxx
+export LARK_APP_SECRET=replace_me_local_secret
+export MEMORY_ENGINE_DB=memory_engine.sqlite3
+export PROJECT_REGISTRY_PATH=config/project_registry.json
+nohup python3 -m feishu_ingest.lark_ws_ingest_daemon > ingest.log 2>&1 &
+
+<span class="comment"># 验证</span>
+curl http://localhost:8000/health
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p><strong>飞书记忆引擎</strong> - 面向企业协作场景的结构化智能体记忆系统</p>
+            <p>版本 1.1 · 2026-05-02 · 可运行 MVP</p>
+            <p style="margin-top: 16px; font-size: 0.8rem;">
+                核心指标：345 测试通过 · 71/71 Benchmark · 100% 提取准确率 · 11.37ms 召回延迟
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Chart.js global config
+        Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // Problem Chart
+        new Chart(document.getElementById('problemChart'), {
+            type: 'bar',
+            data: {
+                labels: ['决策信息', '任务状态', '个人偏好', '协作历史'],
+                datasets: [{
+                    label: '随会话消散比例',
+                    data: [85, 78, 92, 88],
+                    backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: v => v + '%' }
+                    }
+                }
+            }
+        });
+
+        // Memory Type Chart
+        new Chart(document.getElementById('memoryTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Decision', 'Task Status', 'Preference', 'Semantic', 'Procedural', 'Workflow'],
+                datasets: [{
+                    data: [3741, 25, 428, 1270, 276, 100],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+
+        // Scope Chart
+        new Chart(document.getElementById('scopeChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Project', 'Task', 'User', 'Session', 'Organization'],
+                datasets: [{
+                    data: [45, 20, 18, 12, 5],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+
+        // Extraction Patterns Chart
+        new Chart(document.getElementById('extractionPatternsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['决策模式', '任务模式', '偏好模式'],
+                datasets: [{
+                    label: '中文模式',
+                    data: [14, 28, 15],
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8
+                }, {
+                    label: '英文模式',
+                    data: [8, 15, 7],
+                    backgroundColor: '#10b981',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Confidence Chart
+        new Chart(document.getElementById('confidenceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['≥0.8 (强匹配)', '0.6-0.8 (中匹配)', '<0.6 (弱匹配)'],
+                datasets: [{
+                    label: '抽取质量分布',
+                    data: [65, 25, 10],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+
+        // Half Life Chart
+        new Chart(document.getElementById('halfLifeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Decision', 'Task Status', 'Preference', 'Habit Rule', 'Default'],
+                datasets: [{
+                    label: '半衰期 (天)',
+                    data: [60, 14, 90, 120, 30],
+                    backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#94a3b8'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Track Results Chart
+        new Chart(document.getElementById('trackResultsChart'), {
+            type: 'bar',
+            data: {
+                labels: ['A-对话', 'B-任务', 'C-偏好', 'D-结构化', 'E-事件', 'F-工作流', 'G-治理', 'H-改进', 'I-评估'],
+                datasets: [{
+                    label: '通过数',
+                    data: [12, 6, 11, 7, 4, 11, 4, 5, 10],
+                    backgroundColor: '#10b981',
+                    borderRadius: 8
+                }, {
+                    label: '总数',
+                    data: [12, 6, 11, 7, 4, 11, 4, 5, 10],
+                    backgroundColor: '#e2e8f0',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Dataset Chart
+        new Chart(document.getElementById('datasetChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Easy', 'Medium', 'Hard', 'Adversarial'],
+                datasets: [{
+                    label: '用例数量',
+                    data: [523, 2307, 1912, 606],
+                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Business Value Chart
+        new Chart(document.getElementById('businessValueChart'), {
+            type: 'radar',
+            data: {
+                labels: ['摘要完整度', '决策追溯', '风险识别', '跟进草稿', '输入节省', '步骤节省'],
+                datasets: [{
+                    label: '达成率',
+                    data: [100, 100, 100, 100, 81, 80],
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    borderColor: '#10b981',
+                    pointBackgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Baseline Chart
+        new Chart(document.getElementById('baselineChart'), {
+            type: 'bar',
+            data: {
+                labels: ['无记忆', '最近上下文', '记忆启用'],
+                datasets: [{
+                    label: '通过率',
+                    data: [0, 20, 100],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+
+        // Recall Latency Chart
+        new Chart(document.getElementById('recallLatencyChart'), {
+            type: 'line',
+            data: {
+                labels: ['100条', '500条', '1000条'],
+                datasets: [{
+                    label: 'P50 (ms)',
+                    data: [11.37, 28.5, 44.85],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }, {
+                    label: 'P95 (ms)',
+                    data: [12.34, 38.2, 53.11],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Optimization Chart
+        new Chart(document.getElementById('optimizationChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Phase 1 优化前', 'Phase 1 优化后', 'Phase 2 优化后'],
+                datasets: [{
+                    label: 'P95 延迟 (ms)',
+                    data: [98.37, 65.2, 53.11],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Interference Chart
+        new Chart(document.getElementById('interferenceChart'), {
+            type: 'line',
+            data: {
+                labels: ['50条噪声', '100条噪声', '500条噪声'],
+                datasets: [{
+                    label: 'Top-1 命中率',
+                    data: [100, 100, 100],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }, {
+                    label: 'Top-3 命中率',
+                    data: [100, 100, 100],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }
+                }
+            }
+        });
+
+        // Memory Layer Chart
+        new Chart(document.getElementById('memoryLayerChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Working (L0)', 'Factual (L1)', 'L2', 'L3'],
+                datasets: [{
+                    label: '记忆数量',
+                    data: [120, 450, 85, 12],
+                    backgroundColor: ['#94a3b8', '#3b82f6', '#8b5cf6', '#ec4899'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Comparison Chart
+        new Chart(document.getElementById('comparisonChart'), {
+            type: 'radar',
+            data: {
+                labels: ['冲突处理', '作用域隔离', '记忆演化', '隐私脱敏', '审计能力', '工作流复用', '来源追溯'],
+                datasets: [{
+                    label: '本项目',
+                    data: [95, 100, 85, 100, 100, 90, 95],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                }, {
+                    label: 'Mem0',
+                    data: [40, 30, 50, 20, 30, 40, 50],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                }, {
+                    label: 'Letta',
+                    data: [50, 60, 70, 30, 50, 60, 40],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

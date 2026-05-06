@@ -49,13 +49,7 @@ Thumbs.db
 # Local-only docs (not pushed to GitHub by default)
 docs/*
 !docs/
-!docs/whitepaper.md
-!docs/benchmark-report.md
-!docs/项目展示脚本.md
-!docs/核心代码展示清单.md
-!docs/项目亮点与评分维度对照.md
-!docs/最终改进.md
-!docs/明日提交清单.md
+!docs/whitepaper.html
 spec.md
 任务要求.md
 demo_memory_engine.py

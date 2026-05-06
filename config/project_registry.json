@@ -18,6 +18,34 @@
       "openclaw_workspace_ids": [],
       "default_scope": "project",
       "status": "active"
+    },
+    {
+      "project_id": "auto_oc_0a0bc3f3d6bfd3f823b2c0cf88cc154a",
+      "name": "椋炰功缇よ亰 oc_0a0bc3f3d",
+      "aliases": [],
+      "chat_ids": [
+        "oc_0a0bc3f3d6bfd3f823b2c0cf88cc154a"
+      ],
+      "doc_ids": [],
+      "wiki_ids": [],
+      "repo_paths": [],
+      "openclaw_workspace_ids": [],
+      "default_scope": "project",
+      "status": "active"
+    },
+    {
+      "project_id": "auto_oc_74cf0fbb16abffe4c3f651cd9c727ebd",
+      "name": "未命名项目1",
+      "aliases": [],
+      "chat_ids": [
+        "oc_74cf0fbb16abffe4c3f651cd9c727ebd"
+      ],
+      "doc_ids": [],
+      "wiki_ids": [],
+      "repo_paths": [],
+      "openclaw_workspace_ids": [],
+      "default_scope": "project",
+      "status": "active"
     }
   ]
 }
